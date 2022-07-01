@@ -1,14 +1,36 @@
 console.log("script carregado! [ab bird]")
 
 let frames = 0
+let pontuacao = 0
 const somDeMorte = new Audio()
+const somDePonto = new Audio()
+const somDePulo = new Audio()
+
 somDeMorte.src = "./efeitos/morte.mp3"
+somDePonto.src = "./efeitos/ponto.mp3"
+somDePulo.src = "./efeitos/pulo.mp3"
 
 const CarregarSprites = new Image()
 CarregarSprites.src = "./sprites.png"
 
 const canvas = document.querySelector("canvas")
 const contexto = canvas.getContext("2d")
+
+function criarPlacar(){
+  const placar = {
+    pontuacao: 0,
+    spawnar(){
+      contexto.font = '30px "VT323"';
+      contexto.fillStyle = "white";
+      contexto.fillText(`Pontuação: ${placar.pontuacao}`, 50, 90);
+    },
+
+    update(){
+      
+    }
+  }
+  return placar
+}
 
 const globais = {}
 let telaAtual = {}
@@ -83,11 +105,19 @@ function criarCanos(){
         }
       })
     },
+
     temColisaoComOFlappyBird(par) {
       const cabecaDoPassaro = globais.passaro.y;
       const peDoPassaro = globais.passaro.y + globais.passaro.altura;
+
+      if(globais.passaro.x >= par.x && globais.passaro.x <= par.x){
+        globais.placar.pontuacao = globais.placar.pontuacao + 1
+        somDePonto.play()
+        console.log(globais.placar.pontuacao)
+      }
       
-      if(globais.passaro.x >= par.x) {
+      if(globais.passaro.x >= par.x && globais.passaro.x <= par.x + canos.largura) {
+
         if(cabecaDoPassaro <= par.canoCeu.y) {
           return true;
         }
@@ -100,7 +130,7 @@ function criarCanos(){
     },
     pares:[],
     update(){
-      const passou100frames = frames % 100 === 0;
+      const passou100frames = frames % 70 === 0;
       if(passou100frames){
         canos.pares.push({
             x: canvas.width,
@@ -112,7 +142,8 @@ function criarCanos(){
         par.x = par.x - 2
 
         if(canos.temColisaoComOFlappyBird(par)){
-          console.log("bateu no cano")
+          somDeMorte.play()
+          trocarTela(elementos.gameOver)
         }
 
         if(par.x + canos.largura <= 0){
@@ -136,6 +167,7 @@ function criarPassaro(){
     pulo: 4.5,
     pular(){
       passaro.velocidade = - passaro.pulo
+      somDePulo.play()
     },
     forcaGravitacional: 0.25,
     velocidade: 0,
@@ -145,9 +177,7 @@ function criarPassaro(){
       if(colisao(passaro,globais.chaoBackground)){  
         somDeMorte.play()
 
-        setTimeout(() => {
-          trocarTela(elementos.inicio)
-        },2200)
+          trocarTela(elementos.gameOver)
         return
       }
 
@@ -251,54 +281,57 @@ function criarChao(){
  return chaoBackground
 }
 
-const Background = {
-  spriteX: 390,
-  spriteY: 0,
-  largura: 275,
-  altura: 204,
-  x:0,
-  y:canvas.height - 315,
-  spawnar() {
-      contexto.fillStyle = "#70c5ce"
-      contexto.fillRect(0,0, canvas.width, canvas.height)
-
-      contexto.drawImage(
-        CarregarSprites,
-        Background.spriteX,Background.spriteY,
-        Background.largura,Background.altura,
-        Background.x,Background.y,
-        Background.largura,Background.altura,
-      )
-
-      contexto.drawImage(
-        CarregarSprites,
-        Background.spriteX,Background.spriteY,
-        Background.largura,Background.altura,
-        (Background.x + Background.largura),Background.y,
-        Background.largura,Background.altura,
-      )
-      contexto.drawImage(
-        CarregarSprites,
-        Background.spriteX,Background.spriteY,
-        Background.largura,Background.altura,
-        (Background.x + Background.largura * 2),Background.y,
-        Background.largura,Background.altura,
-      )
-      contexto.drawImage(
-        CarregarSprites,
-        Background.spriteX,Background.spriteY,
-        Background.largura,Background.altura,
-        (Background.x + Background.largura * 3),Background.y,
-        Background.largura,Background.altura,
-      )
-      contexto.drawImage(
-        CarregarSprites,
-        Background.spriteX,Background.spriteY,
-        Background.largura,Background.altura,
-        (Background.x + Background.largura * 4),Background.y,
-        Background.largura,Background.altura,
-      ) 
+function criarBackground(){
+  const Background = {
+    spriteX: 390,
+    spriteY: 0,
+    largura: 275,
+    altura: 204,
+    x:0,
+    y:canvas.height - 315,
+    spawnar() {
+        contexto.fillStyle = "#70c5ce"
+        contexto.fillRect(0,0, canvas.width, canvas.height)
+  
+        contexto.drawImage(
+          CarregarSprites,
+          Background.spriteX,Background.spriteY,
+          Background.largura,Background.altura,
+          Background.x,Background.y,
+          Background.largura,Background.altura,
+        )
+  
+        contexto.drawImage(
+          CarregarSprites,
+          Background.spriteX,Background.spriteY,
+          Background.largura,Background.altura,
+          (Background.x + Background.largura),Background.y,
+          Background.largura,Background.altura,
+        )
+        contexto.drawImage(
+          CarregarSprites,
+          Background.spriteX,Background.spriteY,
+          Background.largura,Background.altura,
+          (Background.x + Background.largura * 2),Background.y,
+          Background.largura,Background.altura,
+        )
+        contexto.drawImage(
+          CarregarSprites,
+          Background.spriteX,Background.spriteY,
+          Background.largura,Background.altura,
+          (Background.x + Background.largura * 3),Background.y,
+          Background.largura,Background.altura,
+        )
+        contexto.drawImage(
+          CarregarSprites,
+          Background.spriteX,Background.spriteY,
+          Background.largura,Background.altura,
+          (Background.x + Background.largura * 4),Background.y,
+          Background.largura,Background.altura,
+        ) 
+    }
   }
+  return Background
 }
 
 const telaInicial = {
@@ -320,15 +353,35 @@ const telaInicial = {
   }
 }
 
+const telaGameOver = {
+  spriteX: 134,
+  spriteY: 153,
+  largura: 226,
+  altura: 200,
+  x:(canvas.width / 2 ) - 226 /2 ,
+  y:(canvas.height / 2 ) - 226 /2 ,
+
+  spawnar() {
+    contexto.drawImage(
+     CarregarSprites,
+     telaGameOver.spriteX,telaGameOver.spriteY,
+     telaGameOver.largura,telaGameOver.altura,
+     telaGameOver.x,telaGameOver.y,
+     telaGameOver.largura,telaGameOver.altura,
+    )
+  }
+}
+
 const elementos = {
   inicio:{
     carregar(){
       globais.passaro = criarPassaro()
       globais.chaoBackground = criarChao()
+      globais.Background = criarBackground()
       globais.canos = criarCanos()
     },
     spawn(){
-      Background.spawnar()
+      globais.Background.spawnar()
       globais.passaro.spawnar()
 
       globais.chaoBackground.spawnar()
@@ -344,11 +397,15 @@ const elementos = {
 }
 
 elementos.jogo = {
+  carregar(){
+    globais.placar = criarPlacar();
+  },
   spawn(){
-    Background.spawnar()
+    globais.Background.spawnar()
     globais.canos.spawnar()
     globais.chaoBackground.spawnar()
     globais.passaro.spawnar()
+    globais.placar.spawnar()
   },
   acao(){
     globais.passaro.pular();
@@ -357,8 +414,22 @@ elementos.jogo = {
     globais.canos.update()
     globais.chaoBackground.animar()
     globais.passaro.gravidade()
+    globais.placar.update()
   }
 }
+
+elementos.gameOver = {
+  spawn(){
+    telaGameOver.spawnar();
+  },
+  update(){
+
+  },
+  acao(){
+    trocarTela(elementos.inicio)
+  }
+}
+
 
 function loopFPS(){
   telaAtual.spawn()
